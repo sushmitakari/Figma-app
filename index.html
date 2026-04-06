@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Figma-like App</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        #toolbar {
+            background-color: #f0f0f0;
+            padding: 10px;
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        #canvas {
+            flex: 1;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div id="toolbar">
+        <button id="pen">Pen</button>
+        <button id="eraser">Eraser</button>
+        <button id="clear">Clear</button>
+        <input type="color" id="color" value="#000000">
+        <input type="range" id="size" min="1" max="50" value="5">
+    </div>
+    <canvas id="canvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const penBtn = document.getElementById('pen');
+        const eraserBtn = document.getElementById('eraser');
+        const clearBtn = document.getElementById('clear');
+        const colorInput = document.getElementById('color');
+        const sizeInput = document.getElementById('size');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight - 60; // Adjust for toolbar
+
+        let drawing = false;
+        let tool = 'pen';
+
+        penBtn.addEventListener('click', () => tool = 'pen');
+        eraserBtn.addEventListener('click', () => tool = 'eraser');
+        clearBtn.addEventListener('click', () => ctx.clearRect(0, 0, canvas.width, canvas.height));
+
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+
+        function startDrawing(e) {
+            drawing = true;
+            ctx.beginPath();
+            ctx.moveTo(e.clientX - canvas.offsetLeft, e.clientY - canvas.offsetTop);
+        }
+
+        function draw(e) {
+            if (!drawing) return;
+            ctx.lineWidth = sizeInput.value;
+            ctx.lineCap = 'round';
+            if (tool === 'eraser') {
+                ctx.globalCompositeOperation = 'destination-out';
+            } else {
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.strokeStyle = colorInput.value;
+            }
+            ctx.lineTo(e.clientX - canvas.offsetLeft, e.clientY - canvas.offsetTop);
+            ctx.stroke();
+        }
+
+        function stopDrawing() {
+            drawing = false;
+            ctx.beginPath();
+        }
+    </script>
+</body>
+</html>
